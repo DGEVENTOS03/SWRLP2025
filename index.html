@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Búsqueda Nombre + Apellidos</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 15px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    h3 {
+      font-size: 1rem;
+      margin: 10px 0;
+    }
+    .busqueda-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    #lista div {
+      cursor: pointer;
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      background: white;
+    }
+    #lista div:hover {
+      background-color: #f0f0f0;
+    }
+    /* Resultado en tarjetas para móvil */
+    #resultado {
+      margin-top: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      tr {
+        margin-bottom: 12px;
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+      td {
+        border: none;
+        padding: 6px 0;
+      }
+      td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>2ª LA PALMA SWIMRUN 2025</h1>  
+
+<h3>Buscar participante (nombre y apellidos):</h3>
+
+<div class="busqueda-container">
+  <input type="text" id="busqueda" placeholder="Escribe nombre y/o apellidos" />
+  <button id="limpiarBtn">Limpiar</button>
+</div>
+
+<div id="lista" style="max-height: 200px; overflow-y: auto;"></div>
+<hr />
+<div id="resultado"></div>
+
+<script>
+  // Datos embebidos directamente
+  let datos = [
+    {
+      "NOMBRE": "Ivan",
+      "APELLIDOS": "Aparicio Laborda",
+      "DOCUMENTO": "1681612aa",
+      "DORSAL": 11,
+      "TALLA DE CAMISETA": "Masculino S",
+      "COLOR DEL GORRO": "Amarillo",
+      "TARIFA": "OPEN SOLO"
+    },
+    {  
+      "NOMBRE": "Michele",
+      "APELLIDOS": "Piccolo Farias",
+      "DOCUMENTO": "16816711P",
+      "DORSAL": 248,
+      "TALLA DE CAMISETA": "Masculino XL",
+      "COLOR DEL GORRO": "Rojo",
+      "TARIFA": "OPEN TEAM",
+      "CATEGORIA": "MIXTO",
+      "NOMBRE DEL EQUIPO": "CCCCCC"
+    }
+  ];
+
+  // Normaliza el texto para la búsqueda
+  function normalizarTexto(texto) {
+    return (texto || "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  }
+
+  // Mostrar lista de resultados
+  function mostrarResultados(resultados) {
+    let lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    if (resultados.length === 0) {
+      lista.innerHTML = "<div>No se encontraron resultados</div>";
+      return;
+    }
+
+    resultados.forEach(item => {
+      let div = document.createElement("div");
+      div.textContent = `${item.DORSAL || ""} - ${item.NOMBRE || ""} ${item.APELLIDOS || ""}`;
+      div.onclick = function () {
+        mostrarDetalle(item);
+      };
+      lista.appendChild(div);
+    });
+  }
+
+  // Mostrar detalle completo
+  function mostrarDetalle(item) {
+    let resultado = document.getElementById("resultado");
+
+    let filas = `
+      <tr><th>Dorsal</th><td data-label="Dorsal">${item.DORSAL || ""}</td></tr>
+      <tr><th>Nombre</th><td data-label="Nombre">${item.NOMBRE || ""}</td></tr>
+      <tr><th>Apellidos</th><td data-label="Apellidos">${item.APELLIDOS || ""}</td></tr>
+      <tr><th>Documento</th><td data-label="Documento">${item.DOCUMENTO || ""}</td></tr>
+      <tr><th>Tarifa</th><td data-label="Tarifa">${item.TARIFA || ""}</td></tr>
+      <tr><th>Talla de camiseta</th><td data-label="Talla de camiseta">${item["TALLA DE CAMISETA"] || ""}</td></tr>
+      <tr><th>Color del gorro</th><td data-label="Color del gorro">${item["COLOR DEL GORRO"] || ""}</td></tr>
+    `;
+
+    // Solo añadir "Categoria" si tiene valor
+    if (item["CATEGORIA"] && item["CATEGORIA"].trim() !== "") {
+      filas += `<tr><th>Categoria</th><td data-label="Categoria">${item["CATEGORIA"]}</td></tr>`;
+    }
+
+    // Solo añadir "Nombre del equipo" si tiene valor
+    if (item["NOMBRE DEL EQUIPO"] && item["NOMBRE DEL EQUIPO"].trim() !== "") {
+      filas += `<tr><th>Nombre de equipo</th><td data-label="Nombre de equipo">${item["NOMBRE DEL EQUIPO"]}</td></tr>`;
+    }
+
+    resultado.innerHTML = `<table>${filas}</table>`;
+
+    // Limpiar la lista cuando se selecciona un participante
+    document.getElementById("lista").innerHTML = "";
+  }
+
+  // Buscar al escribir
+  document.getElementById("busqueda").addEventListener("input", function () {
+    let consulta = normalizarTexto(this.value);
+    let palabras = consulta.split(/\s+/).filter(Boolean);
+
+    let resultados = datos.filter(item => {
+      let nombreCompleto = normalizarTexto((item.NOMBRE || "") + " " + (item.APELLIDOS || ""));
+      return palabras.every(p => nombreCompleto.includes(p));
+    });
+
+    mostrarResultados(resultados);
+  });
+
+  // Botón limpiar
+  document.getElementById("limpiarBtn").addEventListener("click", function () {
+    document.getElementById("busqueda").value = "";
+    document.getElementById("lista").innerHTML = "";
+    document.getElementById("resultado").innerHTML = "";
+  });
+</script>
+
+</body>
+</html>
